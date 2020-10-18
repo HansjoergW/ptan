@@ -1,3 +1,12 @@
+Adaptions:
+- use torch 1.6.0
+  - adapt requirements.txt
+  - adapt setup.py
+  
+- ignite.py
+  - class EpisodeEvents(EventEnum) -> inherits from EventEnum
+
+
 
 # PTAN
 
