@@ -165,5 +165,5 @@ class ActorCriticAgent(BaseAgent):
             probs_v = F.softmax(probs_v, dim=1)
         probs = probs_v.data.cpu().numpy()
         actions = self.action_selector(probs)
-        agent_states = values_v.data.squeeze().cpu().numpy().tolist()
+        agent_states = values_v.data.squeeze().cpu().numpy().tolist() # unterschied zu PolicyAgent
         return np.array(actions), agent_states

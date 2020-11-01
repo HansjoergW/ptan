@@ -38,6 +38,10 @@ class EndOfEpisodeHandler:
         State.event_to_attr[EpisodeEvents.BEST_REWARD_REACHED] = "episode"
 
     def __call__(self, engine: Engine):
+        # after initialization of the buffer, calling pop_rewards_steps
+        # can return more than one entry.
+        # however during "normal learning process", calling this method
+        # returns only one tuple after an episode has finished.
         for reward, steps in self._exp_source.pop_rewards_steps():
             engine.state.episode = getattr(engine.state, "episode", 0) + 1
             engine.state.episode_reward = reward
@@ -45,10 +49,15 @@ class EndOfEpisodeHandler:
             engine.state.metrics['reward'] = reward
             engine.state.metrics['steps'] = steps
             self._update_smoothed_metrics(engine, reward, steps)
+
+            # normally, there is no subsampling of episode actives. So generally this
+            # if is executed
             if self._subsample_end_of_episode is None or engine.state.episode % self._subsample_end_of_episode == 0:
                 engine.fire_event(EpisodeEvents.EPISODE_COMPLETED)
+
             if self._bound_avg_reward is not None and engine.state.metrics['avg_reward'] >= self._bound_avg_reward:
                 engine.fire_event(EpisodeEvents.BOUND_REWARD_REACHED)
+
             if self._best_avg_reward is None:
                 self._best_avg_reward = engine.state.metrics['avg_reward']
             elif self._best_avg_reward < engine.state.metrics['avg_reward']:

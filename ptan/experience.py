@@ -114,6 +114,8 @@ class ExperienceSource:
                         while len(history) > 1:
                             history.popleft()
                             yield tuple(history)
+
+                        # at the end of an episode, the the total_reward and total_step is added
                         self.total_rewards.append(cur_rewards[idx])
                         self.total_steps.append(cur_steps[idx])
                         cur_rewards[idx] = 0.0
@@ -133,6 +135,10 @@ class ExperienceSource:
         return r
 
     def pop_rewards_steps(self):
+        # gets the last total_rewards and total_steps
+        # after the buffer has been initilized, this is normally just one tuple
+        # This method is called form the EndOfEpisodeHandler
+
         res = list(zip(self.total_rewards, self.total_steps))
         if res:
             self.total_rewards, self.total_steps = [], []
